@@ -34,3 +34,16 @@ consider reading our introductory guide: :ref:`Optimization with PyGMO`.
    :maxdepth: 1
 
    _src_examples/pygmo_examples/pygmo_orbit_optimization
+
+===================
+CDL Examples
+===================
+
+Below you can find general examples, explained in detail, about using the tools developed for the Concurrent Design 
+Lab (CDL). If you have never used PyGMO before, please
+consider reading our introductory guide: :ref:`Optimization with PyGMO`.
+
+.. toctree::
+   :maxdepth: 1
+
+   _src_examples/cdl_examples/cdl_examples
