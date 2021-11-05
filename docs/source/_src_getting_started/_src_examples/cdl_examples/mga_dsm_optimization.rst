@@ -45,7 +45,7 @@ imported from Tudat.
 ===========================================================
 The ``departure_date`` is to be specified in J2000 (Julian days since 1 January 2000, 12:00 UTC). ``departure_date_margin``
 indicates the time added and subtracted from the nominal departure date to define the departure time boundaries for the
-optimization. In the above example this means that that the departure will occur within half a year before and half a
+optimization. In the above example this means that the departure will occur within half a year before and half a
 year after the nominal date.
 
 1.4. Semi-major axes and eccentricities (optional)
@@ -65,28 +65,12 @@ size and the more evolutions are required to obtain good results.
 The number of parameters within a problem *without* DSMs is equal to the number of planets that are flown by (including the
 departure and destination planet). In contrast, the number of parameters within a problem *with* DSMs is equal to the number
 of planets that are flown by (including the departure and destination planet) *plus* four times the number of legs that are
-flown. The number of parameters for a problem *with* DSMs is thus a multitude of one *without*. This more elaborate problem
-definition makes it more expensive to optimize.
-
-The following table presents a good choice of optimization settings for two case studies along with their problem characteristics:
-
-========  ================================================  ============================ ========================= ===================== =====================
-  DSM?     Planet sequence                                   Number of parameters         Number of evolutions      Population size       Optimization runtime
-========  ================================================  ============================ ========================= ===================== =====================
-   No       Earth, Venus, Venus, Earth, Jupiter, Saturn      6                            3000                      500                    ~3 minutes
-   Yes      Earth, Earth, Venus, Venus, Mercury              21                           2000                      2000                   ~15 minutes
-========  ================================================  ============================ ========================= ===================== =====================
-
-This shows that it is significantly more effective to increase the population size to optimize a more complex problem, than to perform
-more evolutions.
-
-Do note, for a problem *without* DSMs is very much feasible to pick a a large value for the number of generations and be
-on the 'safe side' for the optimization, as the cost in runtime is not too large. This is not the case for a problem *with*
-DSMs, where an evolution costs significantly more time.
+flown. The number of parameters for a problem *with* DSMs is thus significantly larger than for one *without*. This more
+elaborate problem definition makes it computationally more expensive to optimize.
 
 .. note::
 
-    | Both problems *with* and *without* DSMs have the departure time and time of flights per leg as parameters.
+    | Both problems *with* and *without* DSMs have the departure date and time of flight per leg as parameters.
     | Problems *without* DSMs have no additional parameters.
     | Problems *with* DSMs have the following as additional parameters:
     - fraction of the time of flight at which the DSM takes place per leg
@@ -105,6 +89,22 @@ DSMs, where an evolution costs significantly more time.
 
 .. End of note
 
+The following table presents a good choice of optimization settings for two case studies along with their problem characteristics:
+
+========  ================================================  ============================ ========================= ===================== =====================
+  DSM?     Planet sequence                                   Number of parameters         Number of evolutions      Population size       Optimization runtime
+========  ================================================  ============================ ========================= ===================== =====================
+   No       Earth, Venus, Venus, Earth, Jupiter, Saturn      6                            3000                      500                    ~3 minutes
+   Yes      Earth, Earth, Venus, Venus, Mercury              21                           2000                      2000                   ~15 minutes
+========  ================================================  ============================ ========================= ===================== =====================
+
+This shows that it is significantly more effective to increase the population size to optimize a more complex problem, than to perform
+more evolutions.
+
+Do note, for a problem *without* DSMs it is recommended to pick a large value for the number of generations and be
+on the 'safe side' for the optimization, as the cost in runtime is not too large. This is not the case for a problem *with*
+DSMs, where an evolution costs significantly more time.
+
 
 1.6. Tricks to help the optimization
 ===========================================================
@@ -118,25 +118,26 @@ few things that can be done to 'manipulate' the optimization:
 
 * *Set* ``maximum_delta_v``
     It is possible to try and force the optimization towards solutions with lower :math:`\Delta V`. This can be done by specifying
-    a maximum :math:`\Delta V`. This value is used in the optimization to apply a penalty to all solutions that exceed it
-    and thereby forcing it to continue to search for better solutions. There is a risk involved here, if this maximum
+    a maximum :math:`\Delta V`. This value is used in the optimization to apply a penalty to all solutions that exceed it,
+    thereby forcing it to continue to search for better solutions. There is a risk involved here, if this maximum
     :math:`\Delta V` is too low, the optimization may not find any solutions satisfying it at all and won't give you any
-    solutions that are not penalized. The default is set to :math:`2e8 m/s`, so that it is practically ineffective.
+    solutions that are not penalized. The default is set to :math:`2e8` m/s, so that it is practically ineffective.
 
 * *Increase population size*
-    Increasing the population size (even only slightly) will yield a different initial population and will thereby affect
-    the entire evolution and may yield better solutions to be found (may be even in less evolutions).
+    Increasing the population size (even only slightly) will yield a different initial population, thereby affecting
+    the entire evolution and may therefore yield better solutions (maybe even in less evolutions).
 
 * *Reduce number of parameters*
     It may be the case that a problem *with* DSMs is simply too complex to be optimized efficiently. In that case it may
-    be better reduce the number of parameters, either by not using DSMs or by reducing the number of planets that are visited.
+    be better to reduce the number of parameters, either by not using DSMs or by reducing the number of planets that are
+    visited.
 
 Lastly, it was noted that the time of flight range in the Pareto front is rather limited in some cases. In this case it
 may be that the optimization has found optimal solutions for this range, but that these are not acceptable and that larger
-time of flights need to be explored. This may be achieved with the above tricks (e.g. it is adviced to try setting a maximum
+times of flight need to be explored. This may be achieved with the above tricks (e.g. it is adviced to try setting a maximum
 :math:`\Delta V` first), but there is one more trick:
 
-* *Increase minimum time of flights* in :download:`Constants <_static/constants.py>`
+* *Increase minimum times of flight* in :download:`Constants <_static/constants.py>`
     In this file the boundaries as used in the optimization regarding time of flight are defined in days, depending on the planet
     that defines the end of a leg. One can increase the minima (and possibly increase the maxima) to move (and extend) the
     time of flight range of the Pareto front.
@@ -155,3 +156,6 @@ of the optimization. Afterwards, the Pareto front is obtained from the final gen
 The corresponding parameters and fitness values are also saved to text files. If multiple planet sequences are given in
 ``transfer_body_orders``, the next planet sequence is optimized next. Otherwise, the script terminates and the Pareto front(s)
 can be analyzed in order to choose solutions that are interesting for further analysis.
+
+.. warning::
+    TODO: Include some code here to demonstrate?
