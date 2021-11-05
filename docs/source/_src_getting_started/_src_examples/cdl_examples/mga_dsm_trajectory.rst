@@ -8,8 +8,8 @@ In the following sections the definition and analysis of MGA-DSM trajectories wi
 explained. The code that would be used when studying these trajectories is presented, and the differences between
 the definition of trajectories with and without DSMs are highlighted. The full codes can be downloaded through:
 
-| :download:`trajectory without DSMs <_static/mga_noDsm_test.py>`
-| :download:`trajectory with DSMs <_static/mga_dsm_test.py>`
+| :download:`Trajectory without DSMs <_static/mga_noDsm_test.py>`
+| :download:`Trajectory with DSMs <_static/mga_dsm_test.py>`
 
 An MGA-DSM trajectory is defined using the ``MgaDsmTrajectory`` class, thus requiring the following import statement
 
@@ -19,7 +19,7 @@ An MGA-DSM trajectory is defined using the ``MgaDsmTrajectory`` class, thus requ
 .. End of code block
 
 Although not strictly necessary, the following import statement is also used here, as the constants defined in TudatPy
-are helpful when selecting some of the parameters used in code.
+are helpful when selecting some parameters.
 
 .. code-block:: python
 
@@ -43,9 +43,9 @@ sequence of planets for the gravity-assists and the type of legs used. The leg t
     The leg types are specified as strings, therefore they should be defined using apostrophes (``'...'``).
 .. End of note
 
-Additionally, one may also specify the semi-major axis c and eccentricity (:math:`e`) of the departure and insertion orbits.
-Do note that this is optional; by default it is assumed :math:`a = \infty` and :math:`e=0`, which means that the spacecraft
-departs/arrives from the edge of the sphere of influence of the departure/arrival planet.
+Additionally, one may also specify the semi-major axis (:math:`a`) and eccentricity (:math:`e`) of the departure and insertion orbits.
+Do note that this is optional, by default it is assumed :math:`a = \infty` and :math:`e=0` (since the patched conics approximation
+is used, this means that the spacecraft departs/arrives from/at the edge of the sphere of influence of the departure/arrival planet).
 
 .. warning::
     TODO: SOI explanation necessary?
@@ -76,7 +76,7 @@ departs/arrives from the edge of the sphere of influence of the departure/arriva
 -------------------------------------------------
 
 After creating the ``MgaDsmTrajectory`` object, it is necessary to select the various parameters that define the
-gravity-assists and DSMs that are executed during the transfer. The number of parameters that need to be defined and their
+gravity-assists and DSMs that are executed during the transfer. The number of parameters that needs to be defined and their
 meaning can be retrieved with
 
 .. code-block:: python
@@ -93,15 +93,17 @@ In the case of a transfer **with** DSMs one needs to define:
 
 1. Time at departure node
 2. Time of flight between each of the following nodes
-3. Node free parameters
-4. Leg free parametes
+3. Node free-parameters
+4. Leg free-parametes
 
 .. note::
-    The trajectory free parameters must always be specified according to the order given above.
+    The trajectory free-parameters must always be specified according to the order given above.
 .. End of note
 
 .. warning::
     TODO: More detailed definition of free parameters?
+
+    TODO: Musegaas reference
 .. End of warning
 
 The selection of the trajectory parameters is done through the ``evaluate()`` function:
@@ -134,15 +136,6 @@ The selection of the trajectory parameters is done through the ``evaluate()`` fu
 
 .. end of tab
 
-It is not strictly necessary to specify the  trajectory parameters by yourself. It is possible to execute an optimization for
-these parameters:
-
-.. toctree::
-    :maxdepth: 1
-
-    mga_dsm_optimization
-
-
 3. Retrieving transfer trajectory data
 --------------------------------------------------------
 
@@ -170,9 +163,8 @@ The :math:`\Delta V`, :math:`\Delta V` per node (i.e. per gravity-assist), :math
 3.2. State history and other variables history
 ==========================================================
 
-Finally, there is a series functions which allow retrieving the value of different variables throughout the transfer.
+Finally, there is a series of functions which allow retrieving the value of different variables throughout the transfer.
 Each of these functions returns two objects, both of type ``np.ndarray``, in the form ``variable_history, time_history``.
-
 Although not showed in the examples below, if desired, most of these functions also allow the selection of the number
 of values outputted per leg.
 
@@ -197,6 +189,35 @@ The state history with respect to the Sun or the planets of the Solar System can
 
 Solar flux
 #########################################################
+The total incident solar flux in the location of the spacecraft can be retrieved with ``total_solar_flux()``:
+
+.. code-block:: python
+
+    # Total solar flux
+    total_solar_flux_history, time_history = transfer_trajectory.total_solar_flux()
+.. End of code block
+
+Do note that the total solar flux does not take into account the angle of the incident solar radiation, only the
+distance between the Sun and the spacecraft.
+
+Additionally, it is possible to compute the effective solar flux, i.e. the solar flux perpendicular to the solar arrays.
+Currently, this is done by assuming the solar arrays are always perpendicular to some reference direction.
+The options for this reference direction are the Sun-spacecraft vector, planets-spacecraft vectors and the velocity vector.
+Thus, the effective solar flux is computed, using ``effective_solar_flux()``, according to:
+
+.. code-block:: python
+
+    # Solar flux perpendicular to spacecraft-Sun vector, which is the same as total_solar_flux()
+    effective_solar_flux_history, time_history = transfer_trajectory.effective_solar_flux('Sun')
+    # Solar flux perpendicular to velocity vector
+    effective_solar_flux_history, time_history = transfer_trajectory.effective_solar_flux('Velocity')
+    # Solar flux perpendicular to spacecraft-Earth vector
+    effective_solar_flux_history, time_history = transfer_trajectory.effective_solar_flux('Earth')
+.. End of code block
+
+.. warning::
+    TODO: Check if effective solar flux is ok
+.. End of warning
 
 Link budget
 #########################################################
@@ -213,7 +234,7 @@ The link budget can be retrieved using the ``link_budget()`` function. It requir
     transmited_power = 27           # [W]
     transmiter_antenna_gain = 10    # [-]
     receiver_antenna_gain = 1       # [-]
-    frequency = 1.57542e9           # [HZ]
+    frequency = 1.57542e9           # [Hz]
 
     # Link budget
     link_budget_history, time_history = transfer_trajectory.link_budget(frequency,
@@ -225,7 +246,7 @@ The link budget can be retrieved using the ``link_budget()`` function. It requir
 Communications time per day
 #########################################################
 
-To calculate the time available for communications per day as a function of time it is first necessary to define a
+To calculate the time available for communications per day it is first necessary to define a
 ground station, through the ``add_ground_station_simple()`` function.
 The ground station is defined by its latitude and longitude, assuming a spherical Earth.
 
